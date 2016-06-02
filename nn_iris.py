@@ -4,6 +4,8 @@
 import math
 import random
 
+import matplotlib.pyplot as plt
+
 
 # Extract iris data.
 iris_data = []
@@ -53,8 +55,11 @@ class Node(object):
     self.value = 0
     for i, parent_node in enumerate(self.parent_nodes):
       self.value += self.parent_weights[i] * parent_node.value
+    self.value += self.bias
     # ReLU activation.
-    self.value = max(0, self.value)
+    #self.value = max(0, self.value)
+    # Sigmoid activation.
+    self.value = 1 / (1 + math.exp(-self.value))
 
   def back_propagate(self, target_value=0, learning_rate=0.1):
     """Update weights based on target values.
@@ -73,6 +78,8 @@ class Node(object):
     for i, parent_node in enumerate(self.parent_nodes):
       weight_delta = -1 * learning_rate * self.delta * parent_node.value
       self.parent_weights[i] += weight_delta
+    # Update bias term.
+    self.bias += learning_rate * self.delta
 
 
 # Setup input layer.
@@ -143,9 +150,6 @@ forward_propagate(iris_data[0])
 estimate = softmax([n.value for n in output_layer])
 actual = one_hot_encodings[iris_data[0]['name']]
 output_error = sum(mean_squared_error(estimate, actual))
-print estimate
-print actual
-print output_error
 
 
 def back_propagate(target_encoding):
@@ -160,18 +164,22 @@ def back_propagate(target_encoding):
   # Update the output layer.
   for i, node in enumerate(output_layer):
     node.back_propagate(target_value=target_encoding[i])
-
   # Update the hidden layer.
   for node in hidden_layer:
     node.back_propagate()
 
 
-back_propagate(actual)
-print 'round two'
-forward_propagate(iris_data[0])
-estimate = softmax([n.value for n in output_layer])
-actual = one_hot_encodings[iris_data[0]['name']]
-output_error = sum(mean_squared_error(estimate, actual))
-print estimate
-print actual
+errors = []
+for iteration in range(50):
+  for data in iris_data:
+    forward_propagate(data)
+    estimate = softmax([n.value for n in output_layer])
+    actual = one_hot_encodings[data['name']]
+    output_error = sum(mean_squared_error(estimate, actual))
+    back_propagate(actual)
+    errors.append(output_error)
+
+
 print output_error
+plt.plot(errors)
+plt.show()
