@@ -99,7 +99,12 @@ class Layer(object):
     self.deltas = []
 
   def __repr__(self):
-    return 'Layer (%s), %s nodes' % (self.kind, len(self.values))
+    weight_rows, weight_cols = 0, 0
+    if self.weights:
+      weight_rows = len(self.weights)
+      weight_cols = len(self.weights[0])
+    return 'Layer (%s), %s nodes, %s x %s weights' % (
+      self.kind, len(self.values), weight_rows, weight_cols)
 
   def connect_to_parent(self, parent_layer):
     self.parent_layer = parent_layer
