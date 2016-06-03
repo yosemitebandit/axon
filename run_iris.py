@@ -31,9 +31,9 @@ one_hot_encodings = {
 # Setup the network.
 network = axon.networks.Network()
 network.add_layer('input', 4)
-network.add_layer('hidden', 9)
-network.add_layer('hidden', 5)
-network.add_layer('output', 3)
+network.add_layer('hidden', 9, activation='sigmoid')
+network.add_layer('hidden', 5, activation='sigmoid')
+network.add_layer('output', 3, activation='sigmoid')
 print network
 for layer in network.layers:
   print layer
@@ -64,23 +64,39 @@ network.back_propagate(actual_encoding)
 network.forward_propagate(vector)
 estimated_encoding = network.make_estimate()
 actual_encoding = one_hot_encodings[iris_data[0]['name']]
-output_error = axon.util.mean_squared_error_sum(
+output_error2 = axon.util.mean_squared_error_sum(
   estimated_encoding, actual_encoding)
 print '\n\n'
 print estimated_encoding
 print actual_encoding
-print output_error
+print output_error2
+
+print output_error - output_error2
+import sys
+sys.exit()
 
 
-'''
+# Now run it a lot and chart the errors.
 errors = []
-for iteration in range(50):
+for _ in range(10):
   for data in iris_data:
-    forward_propagate(data)
-    estimate = softmax([n.value for n in output_layer])
-    actual = one_hot_encodings[data['name']]
-    output_error = sum(mean_squared_error(estimate, actual))
-    back_propagate(actual)
-   errors.append(output_error)
-print output_error
-'''
+    vector = [
+      data['sepal_length'],
+      data['sepal_width'],
+      data['petal_length'],
+      data['petal_width'],
+    ]
+    network.forward_propagate(vector)
+    estimated_encoding = network.make_estimate()
+    actual_encoding = one_hot_encodings[data['name']]
+    output_error = axon.util.mean_squared_error_sum(
+      estimated_encoding, actual_encoding)
+    network.back_propagate(actual_encoding)
+    errors.append(output_error)
+
+print 'oe', output_error
+
+import matplotlib.pyplot as plt
+
+plt.plot(errors)
+plt.show()

@@ -46,3 +46,8 @@ def mean_squared_error_sum(a, b):
   for index, value in enumerate(a):
     errors.append(0.5 * (value - b[index]) ** 2)
   return sum(errors)
+
+
+def sigmoid(x):
+  """Computes the sigmoid for a value, x."""
+  return 1 / (1 + math.exp(-1 * x))

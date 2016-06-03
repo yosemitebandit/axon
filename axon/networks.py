@@ -13,8 +13,8 @@ class Network(object):
   def __repr__(self):
     return '%s-layer network' % len(self.layers)
 
-  def add_layer(self, kind, size):
-    new_layer = Layer(kind, size)
+  def add_layer(self, kind, size, activation=None):
+    new_layer = Layer(kind, size, activation)
     if len(self.layers) > 0:
       parent_layer = self.layers[-1]
       new_layer.set_weights_based_on_parent(parent_layer)
@@ -24,10 +24,10 @@ class Network(object):
     """Send one vector of data through the network."""
     # Set the input layer values.
     input_layer = self.layers[0]
-    for i, value in enumerate(data):
-      input_layer.values[i][0] = value
+    for index, value in enumerate(data):
+      input_layer.values[index][0] = value
     for index, layer in enumerate(self.layers):
-      if index == 0:
+      if layer.kind == 'input':
         continue
       # Wx + b
       self.layers[index].values = (
@@ -35,6 +35,11 @@ class Network(object):
           axon.util.matrix_product(self.layers[index].weights,
                                    self.layers[index - 1].values),
           self.layers[index].biases))
+      # Run some activation.
+      if layer.activation == 'sigmoid':
+        for value_index, value in enumerate(self.layers[index].values):
+          self.layers[index].values[value_index] = [
+            axon.util.sigmoid(value[0])]
 
   def make_estimate(self):
     """Get the latest estimate via softmax."""
@@ -75,15 +80,15 @@ class Network(object):
           learning_rate * layer.deltas[weight_row_index])
 
 
-
 class Layer(object):
-  def __init__(self, kind, size):
+  def __init__(self, kind, size, activation):
     self.kind = kind
     # Want a size x 1 sized col vector.
     self.values = [[0] for _ in range(size)]
     self.weights = []
     self.biases = [[random.random() * 2 - 1] for _ in range(size)]
     self.deltas = [0 for _ in range(size)]
+    self.activation = activation
 
   def __repr__(self):
     if self.weights:
