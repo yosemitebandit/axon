@@ -40,9 +40,9 @@ def softmax(values):
   return [math.exp(v) / sum([math.exp(v) for v in values]) for v in values]
 
 
-def mean_squared_error(v1, v2):
+def mean_squared_error_sum(a, b):
   """The element-wise mean squared error between two vectors."""
-  mse = []
-  for i, v in enumerate(v1):
-    mse.append(0.5 * (v - v2[i]) ** 2)
-  return mse
+  errors = []
+  for index, value in enumerate(a):
+    errors.append(0.5 * (value - b[index]) ** 2)
+  return sum(errors)

@@ -36,7 +36,7 @@ class Network(object):
                                    self.layers[index - 1].values),
           self.layers[index].biases))
 
-  def estimate(self):
+  def make_estimate(self):
     """Get the latest estimate via softmax."""
     output_layer_values = axon.util.flatten(self.layers[-1].values)
     return axon.util.softmax(output_layer_values)

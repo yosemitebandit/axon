@@ -49,10 +49,11 @@ vector = [
   iris_data[0]['petal_width'],
 ]
 network.forward_propagate(vector)
-print network.estimate()
-sys.exit()
+estimate = network.make_estimate()
 actual = one_hot_encodings[iris_data[0]['name']]
-output_error = sum(axon.util.mean_squared_error(estimate, actual))
+output_error = axon.util.mean_squared_error_sum(estimate, actual)
+print output_error
+sys.exit()
 
 
 '''
