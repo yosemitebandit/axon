@@ -1,3 +1,5 @@
+"""Testing the axon.util module."""
+
 import pytest
 
 import axon
