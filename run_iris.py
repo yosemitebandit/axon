@@ -22,6 +22,7 @@ with open('iris.csv') as iris_file:
     })
 
 
+# Setup encodings.
 one_hot_encodings = {
   'Iris-setosa': [1, 0, 0],
   'Iris-versicolor': [0, 1, 0],
@@ -29,33 +30,30 @@ one_hot_encodings = {
 }
 
 
-# Setup input layer.
-input_layer = axon.networks.Layer('input', 4)
-
-# Setup the first hidden layer.
-hidden_layer_one = axon.networks.Layer('hidden', 9)
-hidden_layer_one.connect_to_parent(input_layer)
-
-# Second the second hidden layer.
-hidden_layer_two = axon.networks.Layer('hidden', 5)
-hidden_layer_two.connect_to_parent(hidden_layer_one)
-
-# Setup output layer.
-output_layer = axon.networks.Layer('output', 3)
-output_layer.connect_to_parent(hidden_layer_two)
+# Setup the network.
+network = axon.networks.Network()
+network.add_layer('input', 4)
+network.add_layer('hidden', 9)
+network.add_layer('hidden', 5)
+network.add_layer('output', 3)
+print network
+for layer in network.layers:
+  print layer
 
 
-print input_layer
-print hidden_layer_one
-print hidden_layer_two
-print output_layer
-
-
-axon.networks.forward_propagate(iris_data[0])
+# Forward propagate one line of the CSV data.
+vector = [
+  iris_data[0]['sepal_length'],
+  iris_data[0]['sepal_width'],
+  iris_data[0]['petal_length'],
+  iris_data[0]['petal_width'],
+]
+network.forward_propagate(vector)
+print network.estimate()
 sys.exit()
-estimate = axon.util.softmax([n.value for n in output_layer])
 actual = one_hot_encodings[iris_data[0]['name']]
 output_error = sum(axon.util.mean_squared_error(estimate, actual))
+
 
 '''
 def back_propagate(target_encoding):

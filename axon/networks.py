@@ -6,13 +6,47 @@ import random
 import axon
 
 
+class Network(object):
+  def __init__(self):
+    self.layers = []
+
+  def __repr__(self):
+    return '%s-layer network' % len(self.layers)
+
+  def add_layer(self, kind, size):
+    new_layer = Layer(kind, size)
+    if len(self.layers) > 0:
+      parent_layer = self.layers[-1]
+      new_layer.set_weights_based_on_parent(parent_layer)
+    self.layers.append(new_layer)
+
+  def forward_propagate(self, data):
+    """Send one vector of data through the network."""
+    # Set the input layer values.
+    input_layer = self.layers[0]
+    for i, value in enumerate(data):
+      input_layer.values[i][0] = value
+    for index, layer in enumerate(self.layers):
+      if index == 0:
+        continue
+      # Wx + b
+      self.layers[index].values = (
+        axon.util.col_vector_sum(
+          axon.util.matrix_product(self.layers[index].weights,
+                                   self.layers[index - 1].values),
+          self.layers[index].biases))
+
+  def estimate(self):
+    """Get the latest estimate via softmax."""
+    output_layer_values = axon.util.flatten(self.layers[-1].values)
+    return axon.util.softmax(output_layer_values)
+
+
 class Layer(object):
   def __init__(self, kind, size):
     self.kind = kind
     # Want a size x 1 sized col vector.
     self.values = [[0] for _ in range(size)]
-    self.parent_layer = None
-    self.child_layer = None
     self.weights = []
     self.biases = [[random.random() * 2 - 1] for _ in range(size)]
     self.deltas = []
@@ -26,45 +60,11 @@ class Layer(object):
     else:
       return '%s layer, %s nodes' % (self.kind, len(self.values))
 
-  def connect_to_parent(self, parent_layer):
-    self.parent_layer = parent_layer
+  def set_weights_based_on_parent(self, parent_layer):
     # Init weights -- each inner array is a row..
     # Parent layer defines the cols.
     self.weights = [
       [0 for _ in parent_layer.values] for _ in self.values]
-    # Setup child layer as well.
-    parent_layer.child_layer = self
-
-
-def forward_propagate(input_layer, data):
-  """Send one line of iris data through the network.
-
-  Args:
-    input_layer: the first layer of the network
-    data: a dict with keys sepal_length, sepal_width, petal_length, petal_width
-          and name
-  """
-  input_layer.values = [
-    data['sepal_length'],
-    data['sepal_width'],
-    data['petal_length'],
-    data['petal_width'],
-  ]
-  # Update subsequent layers.
-  current_layer = input_layer
-  next_layer = input_layer.parent_layer
-  while True:
-    print current_layer, next_layer
-    # Wx + b
-    next_layer.values = (
-      axon.util.col_vector_sum(
-        axon.util.dot_product(next_layer.weights, current_layer.values),
-        next_layer.biases))
-    if not next_layer.parent:
-      break
-    else:
-      current_layer = next_layer
-      next_layer = next_layer.parent
 
 
 class Node(object):
