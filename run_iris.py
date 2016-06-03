@@ -1,7 +1,5 @@
 """Classifying the iris dataset."""
 
-import sys
-
 import axon
 
 
@@ -49,31 +47,32 @@ vector = [
   iris_data[0]['petal_width'],
 ]
 network.forward_propagate(vector)
-estimate = network.make_estimate()
-actual = one_hot_encodings[iris_data[0]['name']]
-output_error = axon.util.mean_squared_error_sum(estimate, actual)
+estimated_encoding = network.make_estimate()
+actual_encoding = one_hot_encodings[iris_data[0]['name']]
+output_error = axon.util.mean_squared_error_sum(
+  estimated_encoding, actual_encoding)
+print estimated_encoding
+print actual_encoding
 print output_error
-sys.exit()
+
+
+# Back propagate errors to update weights based on the actual encoding.
+network.back_propagate(actual_encoding)
+
+
+# Try the estimation again and compare error rates.
+network.forward_propagate(vector)
+estimated_encoding = network.make_estimate()
+actual_encoding = one_hot_encodings[iris_data[0]['name']]
+output_error = axon.util.mean_squared_error_sum(
+  estimated_encoding, actual_encoding)
+print '\n\n'
+print estimated_encoding
+print actual_encoding
+print output_error
 
 
 '''
-def back_propagate(target_encoding):
-  """Back propagate errors through the layers.
-
-  Args:
-    a ground-truth one-hot encoding
-
-  Returns:
-    None, but this will update node weights
-  """
-  # Update the output layer.
-  for i, node in enumerate(output_layer):
-    node.back_propagate(target_value=target_encoding[i])
-  # Update the hidden layer.
-  for node in hidden_layer:
-    node.back_propagate()
-
-
 errors = []
 for iteration in range(50):
   for data in iris_data:
@@ -83,7 +82,5 @@ for iteration in range(50):
     output_error = sum(mean_squared_error(estimate, actual))
     back_propagate(actual)
    errors.append(output_error)
-
-
 print output_error
 '''

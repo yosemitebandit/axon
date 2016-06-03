@@ -41,6 +41,40 @@ class Network(object):
     output_layer_values = axon.util.flatten(self.layers[-1].values)
     return axon.util.softmax(output_layer_values)
 
+  def back_propagate(self, actual_encoding, learning_rate=0.1):
+    """Run the back prop algorithm to update weights."""
+    # Calculate the delta values for each layer.
+    reversed_layers = [l for l in reversed(self.layers)]
+    for layer_index, layer in enumerate(reversed_layers):
+      if layer.kind == 'output':
+        estimated_encoding = self.make_estimate()
+        for index, estimated_value in enumerate(estimated_encoding):
+          layer.deltas[index] = (
+            (estimated_value - actual_encoding[index]) *
+            estimated_value * (1 - estimated_value))
+      elif layer.kind == 'hidden':
+        for value_index, value in enumerate(layer.values):
+          child_layer_weights = [
+            r[value_index] for r in reversed_layers[layer_index-1].weights]
+          child_layer_errors_sum = 0
+          for i, child_weight in enumerate(child_layer_weights):
+            child_layer_errors_sum += (
+              child_weight * reversed_layers[layer_index-1].deltas[i])
+          layer.deltas[value_index] = (
+            value[0] * (1 - value[0]) * child_layer_errors_sum)
+    # Now use the deltas to update weights and biases in each layer.
+    for layer_index, layer in enumerate(self.layers):
+      if layer.kind == 'input':
+        continue
+      for weight_row_index, weight_row in enumerate(layer.weights):
+        for weight_value_index in range(len(weight_row)):
+          weight_row[index] += (
+            -1 * learning_rate * layer.deltas[weight_row_index] *
+            self.layers[layer_index-1].values[weight_value_index][0])
+        layer.biases[weight_row_index][0] += (
+          learning_rate * layer.deltas[weight_row_index])
+
+
 
 class Layer(object):
   def __init__(self, kind, size):
@@ -49,7 +83,7 @@ class Layer(object):
     self.values = [[0] for _ in range(size)]
     self.weights = []
     self.biases = [[random.random() * 2 - 1] for _ in range(size)]
-    self.deltas = []
+    self.deltas = [0 for _ in range(size)]
 
   def __repr__(self):
     if self.weights:
@@ -64,7 +98,8 @@ class Layer(object):
     # Init weights -- each inner array is a row..
     # Parent layer defines the cols.
     self.weights = [
-      [0 for _ in parent_layer.values] for _ in self.values]
+      [random.random() * 2 - 1 for _ in parent_layer.values]
+      for _ in self.values]
 
 
 class Node(object):
