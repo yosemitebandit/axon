@@ -42,3 +42,11 @@ def test_matrix_product_larger():
   expected = [[5,  10, 15, 0],
               [11, 20, 29, 0]]
   assert axon.util.matrix_product(a, b) == expected
+
+
+def test_flatten():
+  a = [[0],
+       [1],
+       [2]]
+  expected = [0, 1, 2]
+  assert axon.util.flatten(a) == expected

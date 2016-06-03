@@ -30,6 +30,11 @@ def matrix_product(a, b):
   return result
 
 
+def flatten(column_matrix):
+  """Flattens a column matrix into a vector."""
+  return [v[0] for v in column_matrix]
+
+
 def softmax(values):
   """Compute the softmax."""
   return [math.exp(v) / sum([math.exp(v) for v in values]) for v in values]
