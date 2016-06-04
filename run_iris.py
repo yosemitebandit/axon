@@ -72,9 +72,10 @@ print '\n\n'
 print estimated_encoding
 print actual_encoding
 print output_error2
+print 'error diff (should be positive):', output_error - output_error2
 
 
-# Now run it a lot and chart the errors.
+# Iterate over the full dataset many times.
 errors = []
 for _ in range(100):
   random.shuffle(iris_data)
@@ -93,8 +94,8 @@ for _ in range(100):
     network.back_propagate(actual_encoding, learning_rate=0.01)
   errors.append(output_error)
 
-print 'oe', output_error
 
+# Chart the errors.
 import matplotlib.pyplot as plt
 plt.plot(errors)
 plt.show()
