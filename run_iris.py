@@ -73,10 +73,6 @@ print estimated_encoding
 print actual_encoding
 print output_error2
 
-print output_error - output_error2
-import sys
-#sys.exit()
-
 
 # Now run it a lot and chart the errors.
 errors = []
@@ -100,6 +96,5 @@ for _ in range(100):
 print 'oe', output_error
 
 import matplotlib.pyplot as plt
-
 plt.plot(errors)
 plt.show()
