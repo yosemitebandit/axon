@@ -1,5 +1,7 @@
 """Classifying the iris dataset."""
 
+import random
+
 import axon
 
 
@@ -73,12 +75,13 @@ print output_error2
 
 print output_error - output_error2
 import sys
-sys.exit()
+#sys.exit()
 
 
 # Now run it a lot and chart the errors.
 errors = []
-for _ in range(10):
+for _ in range(100):
+  random.shuffle(iris_data)
   for data in iris_data:
     vector = [
       data['sepal_length'],
@@ -91,8 +94,8 @@ for _ in range(10):
     actual_encoding = one_hot_encodings[data['name']]
     output_error = axon.util.mean_squared_error_sum(
       estimated_encoding, actual_encoding)
-    network.back_propagate(actual_encoding)
-    errors.append(output_error)
+    network.back_propagate(actual_encoding, learning_rate=0.01)
+  errors.append(output_error)
 
 print 'oe', output_error
 
