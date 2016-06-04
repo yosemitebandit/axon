@@ -37,9 +37,8 @@ class Network(object):
           self.layers[index].biases))
       # Run some activation.
       if layer.activation == 'sigmoid':
-        for value_index, value in enumerate(self.layers[index].values):
-          self.layers[index].values[value_index] = [
-            axon.util.sigmoid(value[0])]
+        for value_index, value in enumerate(layer.values):
+          layer.values[value_index] = [axon.util.sigmoid(value[0])]
 
   def make_estimate(self):
     """Get the latest estimate via softmax."""
